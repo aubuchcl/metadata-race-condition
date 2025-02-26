@@ -3,9 +3,6 @@
 # Define the output file
 OUTPUT_FILE="/root/temp/data"
 
-# Ensure the directory exists
-mkdir -p "$(dirname "$OUTPUT_FILE")"
-
 # Set the duration and interval
 duration=10   # Total duration in seconds
 interval=0.5  # Interval in seconds
