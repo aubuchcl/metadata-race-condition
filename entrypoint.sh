@@ -24,5 +24,7 @@ while true; do
     sleep "$interval"
 done
 
+python compare.py
+
 # After execution, run the normal startup command
 exec "$@"
