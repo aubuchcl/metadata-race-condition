@@ -1,7 +1,7 @@
 #!/bin/sh
 
-# Define the output file
-OUTPUT_FILE="/root/temp/data"
+# Define the output directory
+OUTPUT_DIR="/root/temp/data"
 
 # Set the duration and interval
 duration=10   # Total duration in seconds
@@ -17,8 +17,10 @@ while true; do
         break
     fi
 
-    cat /var/run/cycle/metadata/environment.json >> "$OUTPUT_FILE"
-    echo "\n---\n" >> "$OUTPUT_FILE"  # Separator for readability
+    TIMESTAMP=$(date +%Y%m%d%H%M%S%N)
+    OUTPUT_FILE="$OUTPUT_DIR/output_$TIMESTAMP.json"
+    
+    cat /var/run/cycle/metadata/environment.json > "$OUTPUT_FILE"
     sleep "$interval"
 done
 
