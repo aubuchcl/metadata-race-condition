@@ -1,6 +1,6 @@
 import json
 import os
-from difflib import unified_diff
+from deepdiff import DeepDiff  # Install with: pip install deepdiff
 
 # Define the directory containing JSON files
 json_dir = "/root/temp/data"
@@ -19,6 +19,21 @@ for filename in json_files:
             print(f"Error: {filename} is not valid JSON.")
             json_data[filename] = None  # Mark as None to skip later
 
+# Function to fully sanitize DeepDiff results for JSON serialization
+def make_serializable(obj):
+    """Recursively converts DeepDiff objects (PrettyOrderedSet, frozenset, etc.) into JSON-serializable types."""
+    if isinstance(obj, dict):
+        return {k: make_serializable(v) for k, v in obj.items()}
+    elif isinstance(obj, (set, frozenset)) or "PrettyOrderedSet" in str(type(obj)):  
+        # Convert any set (including PrettyOrderedSet) to a list
+        return list(obj)
+    elif isinstance(obj, list):  # Recursively handle lists
+        return [make_serializable(v) for v in obj]
+    elif hasattr(obj, "to_dict"):  # Convert DeepDiff objects that support `.to_dict()`
+        return make_serializable(obj.to_dict())
+    else:
+        return obj  # Return the object if it’s already serializable
+
 # Compare each file with every other file
 for i in range(len(json_files)):
     for j in range(i + 1, len(json_files)):
@@ -27,15 +42,11 @@ for i in range(len(json_files)):
         if json_data[file1] is None or json_data[file2] is None:
             continue  # Skip invalid JSON files
 
-        content1 = json.dumps(json_data[file1], indent=2, sort_keys=True)
-        content2 = json.dumps(json_data[file2], indent=2, sort_keys=True)
-
-        # Compute differences
-        diff = list(unified_diff(content1.splitlines(), content2.splitlines(), fromfile=file1, tofile=file2, lineterm=''))
+        # Use DeepDiff to compare the two JSON files
+        diff = DeepDiff(json_data[file1], json_data[file2], ignore_order=True)
 
         if diff:
-            print(f"--- Differences between {file1} and {file2} ---")
-            print("\n".join(diff))
-            print("\n")
+            print(f"\n--- Differences between {file1} and {file2} ---")
+            print(json.dumps(make_serializable(diff), indent=2))  # Fully sanitize before printing
         else:
             print(f"No differences found between {file1} and {file2}.")
