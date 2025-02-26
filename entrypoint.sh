@@ -4,7 +4,7 @@
 OUTPUT_DIR="/root/temp/data"
 
 # Set the duration and interval
-duration=10   # Total duration in seconds
+duration=30   # Total duration in seconds
 interval=0.5  # Interval in seconds
 start_time=$(date +%s)
 
